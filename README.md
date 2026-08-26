@@ -90,6 +90,14 @@ de componentes.
 K é laranja. E os tipos fazem sentido: o kit Mobile é `Sistema binário` (duas
 plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 
+**Uma estação espacial cruza o céu.** Aparece pela primeira vez por volta dos 4 s,
+atravessa em ~16 s e some. Volta a cada 2,5–4 min, sempre por uma rota diferente.
+O comportamento segue o da ISS a olho nu: ponto firme e brilhante, **sem piscar** — o
+que pisca é avião — e em parte das passagens ela apaga no meio do céu, ao entrar na
+sombra da Terra, sem chegar à borda. A rota da primeira passagem foi escolhida para
+cair na faixa limpa entre a barra do topo e o rótulo: mais abaixo, ela passava atrás
+do título e ninguém veria. Custo medido: **0 fps** — segue em 60.
+
 **Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
 design gerado por IA. A tipografia é JetBrains Mono como display, não só como
 metadado.
@@ -147,6 +155,15 @@ Corrigidos com `Join-Path` aninhado e `-Force`.
 `IntersectionObserver`. Adicionada rede de segurança: passados 2,6 s, tudo aparece
 independentemente. Numa página de download, conteúdo invisível é o pior defeito
 possível.
+
+**8. A estação passava escondida atrás do título.** A primeira rota cruzava a faixa
+vertical ocupada pelo texto do herói. Como o céu fica atrás do conteúdo, a passagem
+mais importante — a que acontece nos primeiros segundos — era invisível. Rotas
+elevadas para o céu aberto acima do rótulo.
+
+**9. O brilho da estação era um disco de borda dura.** Um `arc()` preenchido com
+`globalAlpha` baixo não é um brilho: é um círculo cinza chapado. Trocado por
+`createRadialGradient` com três paradas.
 
 ---
 

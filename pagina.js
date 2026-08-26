@@ -13,6 +13,7 @@ function ceu(){
   var ctx = cv.getContext('2d', {alpha:true});
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   var L = 0, A = 0, estrelas = [], meteoro = null, t0 = 0, raf = 0;
+  var relogio = 0, est = null, proxEst = 0, rotaIdx = 0;
 
   // 3 camadas de profundidade: longe/média/perto
   var CAMADAS = [
@@ -55,10 +56,82 @@ function ceu(){
     }
   }
 
+  /* ---------- estacao espacial ----------
+     A ISS a olho nu nao pisca: e um ponto firme, mais brilhante que qualquer
+     estrela, atravessando o ceu em poucos minutos. E costuma sumir no meio do
+     caminho ao entrar na sombra da Terra, sem chegar ao horizonte. As duas
+     coisas estao aqui. Rotas em coordenadas relativas para sobreviver a
+     qualquer redimensionamento. */
+  var ROTAS = [
+    // A primeira passagem e a que mais importa e vai pela faixa limpa entre a
+    // barra do topo e o rotulo do heroi: mais baixa que isso ela some atras do
+    // titulo gigante, que e o que acontecia antes.
+    {a:[-0.08, 0.17], b:[ 1.08, 0.085], sombra:false},
+    {a:[ 1.08, 0.11], b:[-0.08, 0.38], sombra:true },
+    {a:[-0.08, 0.60], b:[ 0.88,-0.08], sombra:false},
+    {a:[ 0.16,-0.08], b:[ 1.08, 0.33], sombra:true },
+    {a:[ 1.08, 0.55], b:[-0.08, 0.14], sombra:false}
+  ];
+  var EST_PRIMEIRA  = 3400;               // primeira passagem dentro dos 10 s
+  var EST_TRAVESSIA = 16500;              // duracao de uma travessia
+  var EST_PAUSA     = [155000, 235000];   // 2,5 a 4 min ate a proxima
+
+  function suavizar(q){ return q <= 0 ? 0 : q >= 1 ? 1 : q*q*(3 - 2*q); }
+
+  function desenharEstacao(x, y, ang, alfa, esc){
+    if(alfa <= 0.002) return;
+    var dx = Math.cos(ang), dy = Math.sin(ang);
+
+    // rastro curto, como um registro de longa exposicao
+    var comp = 86*esc;
+    var g = ctx.createLinearGradient(x, y, x - dx*comp, y - dy*comp);
+    g.addColorStop(0, 'rgba(255,240,214,' + (alfa*0.30) + ')');
+    g.addColorStop(1, 'rgba(255,240,214,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.1*esc; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dx*comp, y - dy*comp); ctx.stroke();
+
+    // silhueta: trelica central com dois pares de paineis solares
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(ang); ctx.scale(esc, esc);
+    ctx.fillStyle = 'rgba(92,112,164,' + (alfa*0.88) + ')';
+    ctx.fillRect(-11.5, -6.3, 7, 4.7); ctx.fillRect(-11.5, 1.6, 7, 4.7);
+    ctx.fillRect(  4.5, -6.3, 7, 4.7); ctx.fillRect(  4.5, 1.6, 7, 4.7);
+    ctx.fillStyle = 'rgba(228,235,250,' + (alfa*0.94) + ')';
+    ctx.fillRect(-12, -0.8, 24, 1.6);
+    ctx.fillRect(-2.9, -2.2, 5.8, 4.4);
+    ctx.restore();
+
+    // brilho do modulo: gradiente, nao circulo chapado. Um arc com alpha
+    // baixo desenha um disco de borda dura, que parece sujeira na tela.
+    var h = ctx.createRadialGradient(x, y, 0, x, y, 11*esc);
+    h.addColorStop(0,   'rgba(255,243,220,' + (alfa*0.42) + ')');
+    h.addColorStop(0.4, 'rgba(255,240,214,' + (alfa*0.13) + ')');
+    h.addColorStop(1,   'rgba(255,238,210,0)');
+    ctx.fillStyle = h;
+    ctx.beginPath(); ctx.arc(x, y, 11*esc, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = '#FFF6E2';
+    ctx.globalAlpha = alfa*0.95;
+    ctx.beginPath(); ctx.arc(x, y, 1.9*esc, 0, 6.2832); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  function passagem(q, r){
+    var ax = r.a[0]*L, ay = r.a[1]*A, bx = r.b[0]*L, by = r.b[1]*A;
+    var entra = suavizar(q/0.10);
+    // com sombra ela apaga no meio do ceu; sem, so ao sair pela borda
+    var sai = r.sombra ? 1 - suavizar((q - 0.54)/0.30)
+                       : 1 - suavizar((q - 0.88)/0.12);
+    desenharEstacao(ax + (bx - ax)*q, ay + (by - ay)*q,
+                    Math.atan2(by - ay, bx - ax),
+                    Math.min(entra, sai)*0.96,
+                    Math.max(0.7, Math.min(1, L/1120)));
+  }
+
   function estatico(){
     ctx.clearRect(0,0,L,A);
     for(var i=0;i<estrelas.length;i++) estrela(estrelas[i], estrelas[i].base);
     ctx.globalAlpha = 1;
+    passagem(0.42, ROTAS[0]);   // sem movimento, mas ela continua la
   }
 
   function passo(t){
@@ -98,6 +171,19 @@ function ceu(){
         ctx.lineTo(mx - meteoro.dx*meteoro.comp, my - meteoro.dy*meteoro.comp); ctx.stroke();
       }
     }
+
+    // agenda da estacao: o relogio anda com dt, entao pausa junto com a aba
+    relogio += dt;
+    if(!est && relogio >= proxEst){
+      est = {r: ROTAS[rotaIdx % ROTAS.length], ini: relogio};
+      rotaIdx++;
+    }
+    if(est){
+      var qe = (relogio - est.ini)/EST_TRAVESSIA;
+      if(qe >= 1){ est = null; proxEst = relogio + rnd(EST_PAUSA[0], EST_PAUSA[1]); }
+      else passagem(qe, est.r);
+    }
+
     raf = requestAnimationFrame(passo);
   }
 
@@ -106,6 +192,7 @@ function ceu(){
     if(reduz.matches) estatico(); else raf = requestAnimationFrame(passo);
   }
 
+  proxEst = EST_PRIMEIRA;
   semear(); ligar();
 
   var tmr;
