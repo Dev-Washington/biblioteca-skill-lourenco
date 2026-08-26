@@ -7,6 +7,7 @@ for(const k of CATALOGO){S+=k.skills;A+=k.agents;C+=k.cmds;H+=k.hooks;M+=k.mcps;
 const TOT=S+A+C, MB=(KB/1024).toFixed(1).replace(".",",");
 const num=n=>String(n).replace(".",",");
 const massa=kb=>kb>=1024?[(kb/1024).toFixed(1).replace(".",","),"MB"]:[String(kb),"KB"];
+const setaExt=`<svg class="ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h7v7M13 3 4 12"/></svg>`;
 const seta=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M2.5 13.5h11"/></svg>`;
 
 const linhas=CATALOGO.map(k=>{
@@ -70,6 +71,7 @@ const html=`<!doctype html>
 <title>Catálogo LSK — ${TOT} componentes para o Claude Code</title>
 <meta name="description" content="Treze kits de skills, agents, comandos e hooks para o Claude Code. ${TOT} componentes catalogados, instalados e verificados, prontos para baixar.">
 <meta name="author" content="Washington Lourenço">
+<link rel="author" href="https://portifolio-lourenco.vercel.app/">
 <meta name="theme-color" content="#05060A">
 <meta name="color-scheme" content="dark">
 <meta property="og:title" content="Catálogo LSK — ${TOT} componentes para o Claude Code">
@@ -104,7 +106,7 @@ const html=`<!doctype html>
       <span class="status-sep" aria-hidden="true"></span>
       <span class="pip oculta-mob">13 objetos catalogados</span>
       <span class="status-sep oculta-mob" aria-hidden="true"></span>
-      <span class="oculta-mob">rev. 26.08.2026</span>
+      <a class="destaque-link oculta-mob" href="https://portifolio-lourenco.vercel.app/" target="_blank" rel="noopener noreferrer">por Washington Lourenço</a>
       <a class="pip destaque-link" href="downloads/TODOS-OS-KITS.zip" download>baixar tudo<span class="sr"> — os 13 kits, arquivo zip</span></a>
     </div>
   </header>
@@ -245,13 +247,46 @@ unzip <b>KIT-DEVWEB-AITMPL.zip</b> -d meu-kit</pre>
       </div>
     </section>
 
+    <section class="secao faixa" id="autoria" aria-labelledby="t-autoria">
+      <div class="secao-topo">
+        <span class="indice" aria-hidden="true">04 — Observador</span>
+        <h2 id="t-autoria">Quem compilou</h2>
+      </div>
+      <div class="placa rev">
+        <div class="placa-quem">
+          <p class="placa-rotulo">Compilado e construído por</p>
+          <p class="placa-nome">Washington Lourenço</p>
+          <p class="placa-cargo">Desenvolvedor · front-end e ferramentas</p>
+          <p class="placa-txt">
+            Selecionou os ${TOT} componentes deste catálogo, montou os 13 kits, escreveu a skill
+            <strong>web-motion</strong> — que não existia no catálogo de origem — e construiu
+            esta página.
+          </p>
+          <div class="placa-links">
+            <a class="btn btn-primario" href="https://portifolio-lourenco.vercel.app/" target="_blank" rel="noopener noreferrer">
+              Ver o portfólio${setaExt}
+            </a>
+            <a class="btn" href="https://github.com/Dev-Washington" target="_blank" rel="noopener noreferrer">
+              GitHub${setaExt}
+            </a>
+          </div>
+        </div>
+        <dl class="placa-dados">
+          <div><dt>Observador</dt><dd>Washington Lourenço</dd></div>
+          <div><dt>Portfólio</dt><dd><a href="https://portifolio-lourenco.vercel.app/" target="_blank" rel="noopener noreferrer">portifolio-lourenco.vercel.app</a></dd></div>
+          <div><dt>Repositório</dt><dd><a href="https://github.com/Dev-Washington/biblioteca-skill-lourenco" target="_blank" rel="noopener noreferrer">Dev-Washington/biblioteca-skill-lourenco</a></dd></div>
+          <div><dt>Primeira publicação</dt><dd>26 de agosto de 2026</dd></div>
+        </dl>
+      </div>
+    </section>
+
   </main>
 
   <footer class="colofao faixa">
     <div class="assinatura">
       <span>Catálogo LSK · rev. 26.08.2026</span>
+      <span>Compilado por <a class="destaque-link" href="https://portifolio-lourenco.vercel.app/" target="_blank" rel="noopener noreferrer">Washington Lourenço</a></span>
       <span>${TOT} componentes · 13 objetos · ${MB} MB</span>
-      <span>Feito com Claude Code</span>
     </div>
   </footer>
 

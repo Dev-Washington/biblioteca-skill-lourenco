@@ -6,6 +6,10 @@ e verificados em disco antes de entrar no catálogo.
 
 Página estática — sem framework, sem build, sem dependência.
 
+**Compilado e construído por [Washington Lourenço](https://portifolio-lourenco.vercel.app/)**
+— desenvolvedor, front-end e ferramentas.
+[Portfólio](https://portifolio-lourenco.vercel.app/) · [GitHub](https://github.com/Dev-Washington)
+
 ---
 
 ## Rodar local
@@ -129,5 +133,17 @@ possível.
    editar o arquivo.
 
 ---
+
+## Autoria
+
+**Washington Lourenço** — selecionou os 394 componentes, montou os 13 kits, escreveu
+a skill `web-motion` (que não existia no catálogo de origem) e construiu esta página.
+
+- Portfólio: **https://portifolio-lourenco.vercel.app/**
+- GitHub: https://github.com/Dev-Washington
+
+Os componentes dos kits vêm do catálogo público do [aitmpl.com](https://aitmpl.com/)
+e mantêm suas licenças de origem. A curadoria, a skill `web-motion`, os scripts de
+instalação, a documentação e esta página são de autoria própria.
 
 Feito com [Claude Code](https://claude.com/claude-code).
