@@ -12,6 +12,26 @@ Página estática — sem framework, sem build, sem dependência.
 
 ---
 
+## Multiplataforma
+
+Cada kit traz dois instaladores, com comportamento idêntico:
+
+| Sistema | Comando |
+|---|---|
+| macOS / Linux | `chmod +x install.sh` · `./install.sh /caminho/do/projeto` |
+| Windows | `.\install.ps1 C:\caminho\do\projeto` |
+
+O `install.ps1` é PowerShell nativo — não exige Node, Git Bash nem WSL. Foi testado
+nos 13 kits com PowerShell 7.6.5, e o resultado é byte a byte igual ao do `install.sh`:
+mesma contagem de skills, agents, comandos e hooks, mesmo merge de `settings.json` e
+`.mcp.json`, mesmo `CLAUDE.md`.
+
+Para pular os hooks: `--sem-hooks` (bash) ou `-SemHooks` (PowerShell).
+
+> **Windows e Python.** Dois kits (Engenharia Web e Segurança) têm hooks em Python que
+> chamam `python3`. No Windows o comando geralmente é `python` — ajuste em
+> `.claude/settings.json` ou instale com `-SemHooks`.
+
 ## Rodar local
 
 ```bash
@@ -92,6 +112,8 @@ Tudo abaixo foi medido com Playwright, não estimado:
 | Sem JavaScript | 13 objetos e 13 links de download visíveis |
 | `prefers-reduced-motion` | respeitado |
 | Download + integridade dos zips | 14/14 íntegros |
+| `install.ps1` nos 13 kits | 13/13, paridade total com `install.sh` |
+| Abas de sistema (mac/win/linux) | trocam corretamente, escolha persiste |
 
 ### Problemas encontrados e corrigidos
 
@@ -115,7 +137,13 @@ reprovava em WCAG AA (mínimo 4,5:1) em 7 lugares. Ajustado para 4,91:1.
 linhas — conteúdo interativo aninhado quebra a navegação por teclado. Reestruturado:
 o botão cobre a linha, o link de download fica por cima.
 
-**6. Conteúdo podia ficar invisível.** As revelações dependiam do
+**6. `install.ps1` não copiava nada.** Duas falhas encontradas ao testar com PowerShell
+real: caminhos montados com `\` (que no Unix é caractere literal, não separador), e
+`Get-ChildItem` sem `-Force` — o PowerShell marca tudo sob uma pasta iniciada por ponto
+como oculto, então listava zero arquivos e o script terminava anunciando sucesso.
+Corrigidos com `Join-Path` aninhado e `-Force`.
+
+**7. Conteúdo podia ficar invisível.** As revelações dependiam do
 `IntersectionObserver`. Adicionada rede de segurança: passados 2,6 s, tudo aparece
 independentemente. Numa página de download, conteúdo invisível é o pior defeito
 possível.

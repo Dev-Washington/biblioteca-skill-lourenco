@@ -223,10 +223,44 @@ function copiar(){
   });
 }
 
+
+/* ---------- 6. abas de sistema operacional ---------- */
+function sistemas(){
+  var abas = document.querySelectorAll('.so-aba');
+  if(!abas.length) return;
+
+  function aplicar(so){
+    abas.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.so === so ? 'true' : 'false'); });
+    document.querySelectorAll('[data-so]').forEach(function(el){
+      if(el.classList.contains('so-aba')) return;
+      el.hidden = (el.dataset.so !== so);
+    });
+    try{ localStorage.setItem('lsk-so', so); }catch(e){}
+  }
+
+  abas.forEach(function(b){
+    b.addEventListener('click', function(){ aplicar(b.dataset.so); });
+  });
+
+  /* Detecta o sistema para já abrir na aba certa. Se falhar, fica no macOS,
+     que é o padrão marcado no HTML — nada quebra. */
+  var so = null;
+  try{ so = localStorage.getItem('lsk-so'); }catch(e){}
+  if(!so){
+    var p = (navigator.userAgentData && navigator.userAgentData.platform) ||
+            navigator.platform || navigator.userAgent || '';
+    p = p.toLowerCase();
+    if(p.indexOf('win') === 0 || p.indexOf('windows') > -1) so = 'win';
+    else if(p.indexOf('linux') > -1 && p.indexOf('android') === -1) so = 'linux';
+    else so = 'mac';
+  }
+  aplicar(so);
+}
+
 /* ---------- arranque ---------- */
 document.documentElement.classList.add('js-pronto');
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', iniciar);
 } else { iniciar(); }
-function iniciar(){ ceu(); revelar(); registro(); filtros(); copiar(); }
+function iniciar(){ ceu(); revelar(); registro(); filtros(); copiar(); sistemas(); }
 })();

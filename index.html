@@ -638,41 +638,103 @@
     <section class="secao faixa" aria-labelledby="t-inst">
       <div class="secao-topo">
         <span class="indice" aria-hidden="true">02 — Instrumentação</span>
-        <h2 id="t-inst">Como apontar o telescópio</h2>
+        <h2 id="t-inst">Como baixar e usar</h2>
       </div>
       <p class="nota rev nota-topo">
-        Cada kit é uma pasta com <code>.claude/</code>, documentação e dois scripts. Não precisa de
-        instalação global nem de conta em lugar nenhum.
+        Cada kit é uma pasta com <code>.claude/</code>, documentação e dois instaladores:
+        <code>install.sh</code> para macOS e Linux, <code>install.ps1</code> para Windows.
+        Não precisa de instalação global, conta, nem Node — os instaladores usam só o que já
+        vem com o sistema.
       </p>
+
+      <div class="so" role="group" aria-label="Escolha o sistema operacional">
+        <button class="so-aba" type="button" data-so="mac" aria-pressed="true">macOS</button>
+        <button class="so-aba" type="button" data-so="win" aria-pressed="false">Windows</button>
+        <button class="so-aba" type="button" data-so="linux" aria-pressed="false">Linux</button>
+      </div>
+
       <div class="passos rev-lista">
         <div class="passo">
           <p class="passo-n">Passo 01</p>
           <h3>Baixe e descompacte</h3>
-          <p>Pegue um kit específico ou o pacote completo. Dentro vem tudo pronto — nada é baixado depois.</p>
-          <pre><i># descompacte onde quiser</i>
-unzip <b>KIT-DEVWEB-AITMPL.zip</b> -d meu-kit</pre>
+          <p>Pegue um kit ou o pacote completo, no botão acima. Dentro vem tudo pronto — nada é baixado depois.</p>
+          <pre data-so="mac"><i># o Finder já descompacta com dois cliques.</i>
+<i># pelo terminal:</i>
+unzip <b>KIT-DEVWEB-AITMPL.zip</b> -d meu-kit
+cd meu-kit</pre>
+          <pre data-so="win" hidden><i># o Explorer descompacta com botão direito &gt; Extrair tudo.</i>
+<i># pelo PowerShell:</i>
+Expand-Archive <b>KIT-DEVWEB-AITMPL.zip</b> -DestinationPath meu-kit
+cd meu-kit</pre>
+          <pre data-so="linux" hidden><i># se faltar o unzip: sudo apt install unzip</i>
+unzip <b>KIT-DEVWEB-AITMPL.zip</b> -d meu-kit
+cd meu-kit</pre>
         </div>
+
         <div class="passo">
           <p class="passo-n">Passo 02</p>
           <h3>Aponte para o projeto</h3>
-          <p>O script copia skills, agents e comandos sem sobrescrever nada. Rodar duas vezes não duplica.</p>
-          <pre>cd meu-kit
+          <p>Copia skills, agents e comandos sem sobrescrever nada. Rodar duas vezes não duplica.</p>
+          <pre data-so="mac"><i># libera a execução, só na 1ª vez</i>
+chmod +x install.sh check.sh
+
 <b>./install.sh</b> /caminho/do/projeto
-<b>./check.sh</b>  <i># confere tudo</i></pre>
+<b>./check.sh</b>   <i># confere o que chegou</i></pre>
+          <pre data-so="win" hidden><i># se o Windows bloquear scripts, só nesta janela:</i>
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+<b>.\install.ps1</b> C:\caminho\do\projeto</pre>
+          <pre data-so="linux" hidden><b>chmod</b> +x install.sh check.sh
+
+<b>./install.sh</b> /caminho/do/projeto
+<b>./check.sh</b>   <i># confere o que chegou</i></pre>
         </div>
+
         <div class="passo">
           <p class="passo-n">Passo 03</p>
           <h3>Abra e use</h3>
           <p>As skills ativam sozinhas quando o assunto aparece. Cada kit traz comandos próprios.</p>
-          <pre>cd /caminho/do/projeto
+          <pre data-so="mac">cd /caminho/do/projeto
 <b>claude</b>
-<i># depois, dentro da sessão:</i>
+<i># dentro da sessão:</i>
+<b>/kit-devweb</b></pre>
+          <pre data-so="win" hidden>cd C:\caminho\do\projeto
+<b>claude</b>
+<i># dentro da sessão:</i>
+<b>/kit-devweb</b></pre>
+          <pre data-so="linux" hidden>cd /caminho/do/projeto
+<b>claude</b>
+<i># dentro da sessão:</i>
 <b>/kit-devweb</b></pre>
         </div>
       </div>
+
+      <div class="avisos rev-lista">
+        <p class="aviso" data-so="mac">
+          <b>macOS</b> — se o sistema disser que o arquivo veio da internet e bloquear, rode
+          <code>xattr -d com.apple.quarantine install.sh</code> uma vez. Os kits com hooks em
+          Python usam <code>python3</code>, que já vem no macOS.
+        </p>
+        <p class="aviso" data-so="win" hidden>
+          <b>Windows</b> — o <code>install.ps1</code> usa só PowerShell, sem dependência externa.
+          Dois kits (Engenharia&nbsp;Web e Segurança) trazem hooks escritos em Python que chamam
+          <code>python3</code>; no Windows o comando costuma ser <code>python</code> — ajuste em
+          <code>.claude/settings.json</code>, ou instale sem eles passando
+          <code>-SemHooks</code>. Também funciona pelo WSL ou Git&nbsp;Bash, usando o
+          <code>install.sh</code>.
+        </p>
+        <p class="aviso" data-so="linux" hidden>
+          <b>Linux</b> — precisa do <code>unzip</code> e, para os kits com hooks, do
+          <code>python3</code>. Ambos costumam já estar instalados; se não,
+          <code>sudo apt install unzip python3</code>.
+        </p>
+      </div>
+
       <p class="nota nota-fim">
-        Prefere trabalhar dentro da própria pasta do kit? Também funciona: abra o Claude&nbsp;Code lá
-        dentro e tudo carrega automaticamente, sem instalar em lugar nenhum.
+        Prefere não instalar em lugar nenhum? Abra o Claude&nbsp;Code dentro da própria pasta do
+        kit — tudo carrega automaticamente. E se um kit tiver hooks que bloqueiam comandos, você
+        pode instalar sem eles: <code>./install.sh /destino --sem-hooks</code> no macOS e Linux,
+        <code>.\install.ps1 C:\destino -SemHooks</code> no Windows.
       </p>
     </section>
 

@@ -445,3 +445,27 @@ svg.ext{width:11px;height:11px;flex:none;opacity:.75}
 .placa-dados a:focus-visible{outline:2px solid var(--ambar);outline-offset:3px;border-radius:2px}
 
 .assinatura a{text-decoration:none}
+
+/* ---------- abas de sistema operacional ---------- */
+.so{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1.4rem}
+.so-aba{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.58rem .95rem;border:1px solid var(--linha);border-radius:2px;color:var(--texto-3);
+  transition:color var(--d-rapido) linear,border-color var(--d-rapido) linear,
+             background-color var(--d-rapido) linear;
+}
+.so-aba:hover{color:var(--texto-2);border-color:var(--linha-forte)}
+.so-aba[aria-pressed="true"]{color:var(--texto);border-color:var(--texto-3);background:var(--camada)}
+.so-aba:focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
+
+.avisos{margin-top:1.5rem}
+.aviso{
+  margin:0;border-left:2px solid var(--ambar);padding:.15rem 0 .15rem 1rem;
+  color:var(--texto-2);font-size:.9rem;max-width:74ch;
+}
+.aviso b{color:var(--texto);font-family:var(--mono);font-size:.9em;letter-spacing:.04em}
+.aviso code{
+  font-family:var(--mono);font-size:.88em;background:var(--camada-2);
+  padding:.1em .38em;border-radius:2px;color:var(--gelo);overflow-wrap:anywhere;
+}
+.passo pre[hidden],.aviso[hidden]{display:none}
