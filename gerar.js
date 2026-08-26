@@ -90,6 +90,8 @@ const html=`<!doctype html>
 <a class="pular" href="#catalogo">Pular para o catálogo</a>
 
 <div id="ceu" aria-hidden="true">
+  <video id="fundo" class="fundo" muted loop playsinline preload="none"
+         disablepictureinpicture tabindex="-1"></video>
   <div class="nebulosa neb-1"></div>
   <div class="nebulosa neb-2"></div>
   <div class="nebulosa neb-3"></div>

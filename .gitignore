@@ -4,3 +4,6 @@
 node_modules/
 .vercel
 *.log
+
+# videos originais do celular: fonte para video/, nao vao para o deploy
+IMG_*.MP4

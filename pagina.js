@@ -5,6 +5,8 @@
 (function(){
 'use strict';
 var reduz = window.matchMedia('(prefers-reduced-motion: reduce)');
+var pararCeu = null;   // preenchido por ceu(), usado quando o video assume
+var videoNoAr = false; // com video, a estacao vetorial nao passa
 
 /* ---------- 1. campo de estrelas ---------- */
 function ceu(){
@@ -169,6 +171,7 @@ function ceu(){
   }
 
   function passagem(q, r){
+    if(videoNoAr) return;      // ja existe uma estacao real na tela
     var ax = r.a[0]*L, ay = r.a[1]*A, bx = r.b[0]*L, by = r.b[1]*A;
     var entra = suavizar(q/0.10);
     // com sombra ela apaga no meio do ceu; sem, so ao sair pela borda
@@ -249,6 +252,10 @@ function ceu(){
 
   proxEst = EST_PRIMEIRA;
   semear(); ligar();
+
+  // Esconder por CSS nao basta: o laco continuaria rodando e gastando
+  // bateria por tras de um canvas invisivel.
+  pararCeu = function(){ cancelAnimationFrame(raf); raf = 0; ctx.clearRect(0,0,L,A); };
 
   var tmr;
   window.addEventListener('resize', function(){
@@ -399,10 +406,67 @@ function sistemas(){
   aplicar(so);
 }
 
+/* ---------- 7. video de fundo ---------- */
+/* Decidido no topo do script, que roda com defer -- DOM ja montado, nada
+   pintado ainda. Em retrato o heroi ganha um respiro de ceu, e essa folga
+   precisa estar valendo antes da primeira pintura, senao o texto desce
+   sozinho quando o video engata. */
+function podeVideo(){
+  var v = document.getElementById('fundo');
+  if(!v || !v.canPlayType || !v.canPlayType('video/mp4')) return false;
+  if(reduz.matches) return false;                       // ceu quieto continua quieto
+  var con = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  // 400-680 KB de fundo decorativo nao se impoe a quem paga por megabyte
+  if(con && (con.saveData || /^(slow-)?2g$/.test(con.effectiveType || ''))) return false;
+  return true;
+}
+
+function fundo(){
+  var v = document.getElementById('fundo');
+  if(!v || !document.documentElement.classList.contains('video-previsto')) return;
+
+  // Retrato pede o corte vertical; paisagem, o horizontal.
+  var retrato = window.innerHeight > window.innerWidth;
+  v.poster = retrato ? 'video/poster-mobile.jpg' : 'video/poster-desktop.jpg';
+  v.src    = retrato ? 'video/ceu-mobile.mp4'    : 'video/ceu-desktop.mp4';
+
+  // So troca de camada quando o video de fato comecou a andar. Se o autoplay
+  // for bloqueado, este evento nunca dispara e o canvas segue no lugar dele.
+  v.addEventListener('playing', function(){
+    document.documentElement.classList.add('video-ativo');
+    v.classList.add('tocando');
+    videoNoAr = true;
+  }, {once:true});
+
+  // Fora do heroi o video nao tem serventia e passaria por tras de texto.
+  // Some e pausa: menos bateria e nenhum risco de contraste la embaixo.
+  var heroi = document.querySelector('.levantamento');
+  if(heroi && 'IntersectionObserver' in window){
+    new IntersectionObserver(function(e){
+      var dentro = e[0].isIntersecting;
+      v.classList.toggle('tocando', dentro && videoNoAr);
+      if(dentro){ if(v.paused && videoNoAr) v.play().catch(function(){}); }
+      else v.pause();
+    }, {threshold:0}).observe(heroi);
+  }
+
+  v.load();
+  var p = v.play();
+  if(p && p.catch) p.catch(desistir);
+  v.addEventListener('error', desistir, {once:true});
+
+  // Autoplay negado ou video quebrado: devolve o layout ao estado sem video,
+  // senao sobraria um vao de ceu vazio no alto do celular.
+  function desistir(){
+    document.documentElement.classList.remove('video-previsto');
+  }
+}
+
 /* ---------- arranque ---------- */
 document.documentElement.classList.add('js-pronto');
+if(podeVideo()) document.documentElement.classList.add('video-previsto');
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', iniciar);
 } else { iniciar(); }
-function iniciar(){ ceu(); revelar(); registro(); filtros(); copiar(); sistemas(); }
+function iniciar(){ ceu(); fundo(); revelar(); registro(); filtros(); copiar(); sistemas(); }
 })();

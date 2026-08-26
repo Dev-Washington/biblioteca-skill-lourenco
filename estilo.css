@@ -41,7 +41,43 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 /* ---------- céu ---------- */
 #ceu{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-#estrelas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#estrelas{position:absolute;inset:0;width:100%;height:100%;display:block;
+  transition:opacity .9s ease}
+
+/* Video de fundo. So aparece quando o JS confirma que ele realmente comecou a
+   tocar: sem JS, com movimento reduzido, com economia de dados ou com autoplay
+   bloqueado, quem assume e o ceu em canvas. Nunca fica um retangulo preto.
+
+   A mascara e o ponto principal. Escurecer a tela inteira nao resolve: ou o
+   texto fica ilegivel sobre os paineis solares, ou a estacao vira sombra --
+   medi os dois extremos. Entao o video ocupa so o canto sem texto e dissolve
+   no campo de estrelas do canvas, que continua rodando por tras. */
+.fundo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:74% 18%;opacity:0;transition:opacity 1.4s ease;
+  -webkit-mask-image:radial-gradient(ellipse 58% 54% at 80% 30%,#000 18%,rgba(0,0,0,.58) 46%,transparent 74%);
+          mask-image:radial-gradient(ellipse 58% 54% at 80% 30%,#000 18%,rgba(0,0,0,.58) 46%,transparent 74%)}
+.fundo.tocando{opacity:.92}
+
+/* Em retrato nao sobra canto: a coluna de texto ocupa a largura toda. O video
+   vira uma faixa no alto, acima do titulo, e apaga antes de encostar nele. */
+@media (max-aspect-ratio: 4/5){
+  /* Em retrato a estacao fica no meio do quadro e nao ha canto livre. Duas
+     mudancas resolvem: o video vira uma faixa no alto -- e como a altura deixa
+     de ser a dimensao limitante, object-position vertical volta a funcionar e
+     enquadra a estacao -- e o heroi ganha um respiro de ceu acima do titulo. */
+  .fundo{inset:0 0 auto 0;height:40vh;object-position:58% 50%;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0 46%,rgba(0,0,0,.45) 72%,transparent 96%);
+            mask-image:linear-gradient(to bottom,#000 0 46%,rgba(0,0,0,.45) 72%,transparent 96%)}
+  /* .video-previsto e decidido antes da primeira pintura. Se dependesse de
+     .video-ativo, que so entra quando o video comeca a tocar, o conteudo
+     desceria com a pagina ja na tela -- salto de layout. */
+  .video-previsto .levantamento{padding-block-start:clamp(9rem,25vh,15rem)}
+}
+
+/* Duas estacoes na mesma tela seria bobagem: com o video no ar, a estacao
+   vetorial do canvas para de passar. As estrelas continuam -- e nelas que o
+   video se dissolve. */
+.video-ativo .grade{opacity:.3}
 /* Sem filter:blur() de propósito. Blur de 90px em elemento de 70vw
    derruba o frame rate (medido: 25 fps com, 61 fps sem). O mesmo
    resultado visual vem de paradas suaves no próprio gradiente. */
@@ -68,6 +104,15 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 }
 .veu{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 130% 78% at 50% -12%,transparent 32%,rgba(5,6,10,.62) 78%,var(--vazio) 100%)}
+
+/* O cabecalho e translucido (72%), entao os paineis solares atravessavam ele
+   e derrubavam o texto para 1,7:1. No modo video ele fecha. */
+.video-ativo .status{background:rgba(5,6,10,.95)}
+
+/* O texto terciario tem 4,91:1 contra o preto puro -- quase nenhuma folga.
+   Com o video no ar ele mede entre 4,3 e 4,8:1, oscilando em torno do minimo
+   de 4,5. Sobe um degrau apenas neste modo; a versao em canvas fica intacta. */
+.video-ativo{--texto-3:#8B92A4}
 
 /* ---------- casca ---------- */
 .envelope{position:relative;z-index:2}

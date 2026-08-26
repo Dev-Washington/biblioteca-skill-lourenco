@@ -90,7 +90,22 @@ de componentes.
 K é laranja. E os tipos fazem sentido: o kit Mobile é `Sistema binário` (duas
 plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 
-**Uma estação espacial cruza o céu.** É a ISS desenhada em vetor no canvas:
+**Um vídeo real da ISS ocupa o alto do herói.** Dois cortes, um por formato:
+paisagem no desktop, retrato no celular. Cada dispositivo baixa só o seu —
+676 KB ou 400 KB. Os originais foram processados antes de entrar: marca d'água
+do gerador apagada com `delogo`, faixa de áudio removida (inútil num fundo mudo,
+custava 160 KB) e o laço fechado com ida e volta, porque o clipe termina com a
+estação grande no centro e recomeça com ela minúscula — em laço simples isso é
+um corte seco a cada poucos segundos. Diferença medida entre o primeiro e o
+último quadro: **0,59** contra 13,9 de dois quadros quaisquer.
+
+O vídeo não cobre a tela: uma máscara o deixa só no canto sem texto e o dissolve
+no campo de estrelas do canvas, que continua rodando por baixo. Escurecer a tela
+inteira não funciona — testei os dois extremos e ou o texto fica ilegível sobre
+os painéis solares, ou a estação vira uma sombra. E ele **some ao sair do herói**,
+para que nenhum texto do resto da página seja composto contra ele.
+
+**Uma estação espacial cruza o céu quando não há vídeo.** É a ISS desenhada em vetor no canvas:
 treliça integrada, os quatro pares de asas solares nas pontas, radiadores brancos
 junto ao centro e a pilha de módulos pressurizados atravessada no meio, com a nave
 acoplada na ponta. Vetor e não foto — fica nítida em qualquer densidade de tela, não
@@ -184,6 +199,20 @@ nada em arquivos de 13 KB.
 **11. Argumentos trocados na chamada de desenho.** `culm` entrou antes de `esc`, que
 é a ordem inversa da assinatura. `node --check` não pega isso: a sintaxe é válida e a
 escala viraria o fator de brilho. Pego ao conferir a assinatura contra a chamada.
+
+**12. O contraste caía com o vídeo no ar.** Medi o pixel de fundo sob a caixa de
+cada bloco de texto, em dez instantes do laço, e comparei com a cor computada de
+cada um. Três falhas: o cabeçalho é translúcido (72%) e os painéis solares
+atravessavam ele, derrubando o texto para 1,7:1; e o texto terciário, que tem
+4,91:1 contra o preto puro, ficava entre 4,3 e 4,8:1 — oscilando em torno do
+mínimo de 4,5. Cabeçalho fechado e o terciário sobe um degrau, ambos apenas no
+modo vídeo. Pior caso agora: 5,74:1.
+
+**13. O vídeo empurrava o texto depois da página pintada.** No celular o herói
+ganha um respiro de céu acima do título, e essa folga dependia da classe que só
+entra quando o vídeo começa a tocar — ou seja, o conteúdo descia sozinho um
+segundo depois. Separado em duas classes: a decisão de layout é tomada antes da
+primeira pintura, o efeito visual vem depois. CLS medido: 0,003.
 
 ---
 
