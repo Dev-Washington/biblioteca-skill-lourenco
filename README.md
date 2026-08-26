@@ -90,7 +90,13 @@ de componentes.
 K é laranja. E os tipos fazem sentido: o kit Mobile é `Sistema binário` (duas
 plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 
-**Uma estação espacial cruza o céu.** Aparece pela primeira vez por volta dos 4 s,
+**Uma estação espacial cruza o céu.** É a ISS desenhada em vetor no canvas:
+treliça integrada, os quatro pares de asas solares nas pontas, radiadores brancos
+junto ao centro e a pilha de módulos pressurizados atravessada no meio, com a nave
+acoplada na ponta. Vetor e não foto — fica nítida em qualquer densidade de tela, não
+soma nada ao carregamento e não depende de imagem de banco. Ela também **gira devagar
+ao longo da passagem**, porque a estação mantém a atitude em relação à Terra e por
+isso muda de ângulo para quem olha do chão. Aparece pela primeira vez por volta dos 4 s,
 atravessa em ~16 s e some. Volta a cada 2,5–4 min, sempre por uma rota diferente.
 O comportamento segue o da ISS a olho nu: ponto firme e brilhante, **sem piscar** — o
 que pisca é avião — e em parte das passagens ela apaga no meio do céu, ao entrar na

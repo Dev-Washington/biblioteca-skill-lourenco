@@ -78,7 +78,58 @@ function ceu(){
 
   function suavizar(q){ return q <= 0 ? 0 : q >= 1 ? 1 : q*q*(3 - 2*q); }
 
-  function desenharEstacao(x, y, ang, alfa, esc, culm){
+  /* Silhueta da ISS: trelica integrada com as oito asas solares em quatro
+     grupos, radiadores brancos junto ao centro e a pilha de modulos
+     pressurizados atravessada no meio, com a nave acoplada na ponta.
+     Desenhada em vetor e nao como imagem: nitida em qualquer densidade de
+     tela, some no peso da pagina e sem foto de banco envolvida. */
+  function asaSolar(x, y, w, h, quente, A){
+    var g = ctx.createLinearGradient(x, y, x, y + h);
+    if(quente){
+      g.addColorStop(0,   'rgba(146,98,68,'   + (A*0.90) + ')');
+      g.addColorStop(0.5, 'rgba(208,148,104,' + (A*0.98) + ')');
+      g.addColorStop(1,   'rgba(128,84,58,'   + (A*0.88) + ')');
+    } else {
+      g.addColorStop(0,   'rgba(44,60,104,'   + (A*0.90) + ')');
+      g.addColorStop(0.5, 'rgba(96,124,188,'  + (A*0.98) + ')');
+      g.addColorStop(1,   'rgba(38,52,92,'    + (A*0.88) + ')');
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = 'rgba(224,232,248,' + (A*0.5) + ')';
+    ctx.fillRect(x, y + h/2 - 0.3, w, 0.6);        // mastro da asa
+  }
+
+  // Quatro pares de asas, dois em cada ponta da trelica, cada par com uma asa
+  // de cada lado. Sao longas e estreitas -- cerca de 34 m por 12 m na real --
+  // e nao quadradas. [x inicial, acobreada]
+  var ASAS = [[-28.4, 1], [-22.2, 0], [16.4, 0], [22.6, 1]];
+
+  function corpoISS(A){
+    var i, g;
+    for(i = 0; i < ASAS.length; i++){
+      g = ASAS[i];
+      asaSolar(g[0], -15.6, 5.8, 13.4, g[1], A);
+      asaSolar(g[0],   2.2, 5.8, 13.4, g[1], A);
+    }
+    // trelica integrada, com os nos entre segmentos
+    ctx.fillStyle = 'rgba(208,218,240,' + (A*0.95) + ')';
+    ctx.fillRect(-28.4, -1.0, 56.8, 2.0);
+    ctx.fillStyle = 'rgba(142,156,190,' + (A*0.85) + ')';
+    for(i = -22; i <= 22; i += 11) ctx.fillRect(i - 0.7, -2.4, 1.4, 4.8);
+    // radiadores: tres paineis brancos e finos junto ao centro
+    ctx.fillStyle = 'rgba(240,245,254,' + (A*0.82) + ')';
+    for(i = 0; i < 3; i++) ctx.fillRect(5.6 + i*2.9, -10.2, 1.9, 9.0);
+    // pilha de modulos pressurizados atravessada na trelica
+    ctx.fillStyle = 'rgba(236,242,253,' + (A*0.97) + ')';
+    ctx.fillRect(-2.3, -8.6, 4.6, 7.8);
+    ctx.fillRect(-2.1,  1.0, 4.2, 13.0);
+    ctx.fillStyle = 'rgba(166,180,210,' + (A*0.90) + ')';
+    ctx.fillRect(-6.2, 5.2, 12.4, 1.4);                     // asas do Zvezda
+    ctx.fillRect(-1.4, 14.0, 2.8, 3.6);                     // nave acoplada
+  }
+
+  function desenharEstacao(x, y, ang, alfa, esc, culm, giro){
     if(alfa <= 0.002) return;
     var dx = Math.cos(ang), dy = Math.sin(ang);
     // A ISS fica mais brilhante perto da culminancia, quando esta mais proxima.
@@ -86,38 +137,34 @@ function ceu(){
     var b = 1 + 0.45*(culm || 0);
 
     // rastro, como um registro de longa exposicao
-    var comp = 132*esc;
+    var comp = 150*esc;
     var g = ctx.createLinearGradient(x, y, x - dx*comp, y - dy*comp);
-    g.addColorStop(0,   'rgba(255,240,214,' + (alfa*0.42*b) + ')');
-    g.addColorStop(0.45,'rgba(255,240,214,' + (alfa*0.14*b) + ')');
+    g.addColorStop(0,   'rgba(255,240,214,' + (alfa*0.30*b) + ')');
+    g.addColorStop(0.45,'rgba(255,240,214,' + (alfa*0.10*b) + ')');
     g.addColorStop(1,   'rgba(255,240,214,0)');
-    ctx.strokeStyle = g; ctx.lineWidth = 1.35*esc; ctx.lineCap = 'round';
+    ctx.strokeStyle = g; ctx.lineWidth = 1.3*esc; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dx*comp, y - dy*comp); ctx.stroke();
 
-    // silhueta: trelica central com dois pares de paineis solares
-    ctx.save();
-    ctx.translate(x, y); ctx.rotate(ang); ctx.scale(esc, esc);
-    ctx.fillStyle = 'rgba(92,112,164,' + (alfa*0.88) + ')';
-    ctx.fillRect(-11.5, -6.3, 7, 4.7); ctx.fillRect(-11.5, 1.6, 7, 4.7);
-    ctx.fillRect(  4.5, -6.3, 7, 4.7); ctx.fillRect(  4.5, 1.6, 7, 4.7);
-    ctx.fillStyle = 'rgba(228,235,250,' + (alfa*0.94) + ')';
-    ctx.fillRect(-12, -0.8, 24, 1.6);
-    ctx.fillRect(-2.9, -2.2, 5.8, 4.4);
-    ctx.restore();
-
-    // brilho do modulo: gradiente, nao circulo chapado. Um arc com alpha
-    // baixo desenha um disco de borda dura, que parece sujeira na tela.
-    var rh = 17*esc*b;
+    // halo por tras, para nao lavar a silhueta que vem depois
+    var rh = 26*esc*b;
     var h = ctx.createRadialGradient(x, y, 0, x, y, rh);
-    h.addColorStop(0,   'rgba(255,246,226,' + (alfa*0.62*b) + ')');
-    h.addColorStop(0.28,'rgba(255,240,214,' + (alfa*0.24*b) + ')');
-    h.addColorStop(0.6, 'rgba(255,236,204,' + (alfa*0.07*b) + ')');
+    h.addColorStop(0,   'rgba(255,246,226,' + (alfa*0.30*b) + ')');
+    h.addColorStop(0.3, 'rgba(255,240,214,' + (alfa*0.13*b) + ')');
+    h.addColorStop(0.65,'rgba(255,236,204,' + (alfa*0.04*b) + ')');
     h.addColorStop(1,   'rgba(255,236,204,0)');
     ctx.fillStyle = h;
     ctx.beginPath(); ctx.arc(x, y, rh, 0, 6.2832); ctx.fill();
+
+    // A estacao mantem a atitude em relacao a Terra, entao para quem olha do
+    // chao ela vira devagar ao longo da passagem. Dai o giro.
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(ang + giro); ctx.scale(esc, esc);
+    corpoISS(alfa);
+    ctx.restore();
+
     ctx.fillStyle = '#FFFAF0';
-    ctx.globalAlpha = Math.min(1, alfa*1.0*b);
-    ctx.beginPath(); ctx.arc(x, y, 2.4*esc, 0, 6.2832); ctx.fill();
+    ctx.globalAlpha = Math.min(1, alfa*0.85*b);
+    ctx.beginPath(); ctx.arc(x, y, 1.7*esc, 0, 6.2832); ctx.fill();
     ctx.globalAlpha = 1;
   }
 
@@ -130,8 +177,9 @@ function ceu(){
     desenharEstacao(ax + (bx - ax)*q, ay + (by - ay)*q,
                     Math.atan2(by - ay, bx - ax),
                     Math.min(entra, sai)*0.98,
-                    Math.max(1.05, Math.min(1.75, L/840)),
-                    Math.sin(q*Math.PI));
+                    Math.max(0.62, Math.min(1.22, L/1180)),
+                    Math.sin(q*Math.PI),
+                    -0.42 + 0.78*q);
   }
 
   function estatico(){
