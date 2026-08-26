@@ -78,16 +78,20 @@ function ceu(){
 
   function suavizar(q){ return q <= 0 ? 0 : q >= 1 ? 1 : q*q*(3 - 2*q); }
 
-  function desenharEstacao(x, y, ang, alfa, esc){
+  function desenharEstacao(x, y, ang, alfa, esc, culm){
     if(alfa <= 0.002) return;
     var dx = Math.cos(ang), dy = Math.sin(ang);
+    // A ISS fica mais brilhante perto da culminancia, quando esta mais proxima.
+    // E um inchaco lento ao longo de 16 s, nao um pisca-pisca: satelite nao pisca.
+    var b = 1 + 0.45*(culm || 0);
 
-    // rastro curto, como um registro de longa exposicao
-    var comp = 86*esc;
+    // rastro, como um registro de longa exposicao
+    var comp = 132*esc;
     var g = ctx.createLinearGradient(x, y, x - dx*comp, y - dy*comp);
-    g.addColorStop(0, 'rgba(255,240,214,' + (alfa*0.30) + ')');
-    g.addColorStop(1, 'rgba(255,240,214,0)');
-    ctx.strokeStyle = g; ctx.lineWidth = 1.1*esc; ctx.lineCap = 'round';
+    g.addColorStop(0,   'rgba(255,240,214,' + (alfa*0.42*b) + ')');
+    g.addColorStop(0.45,'rgba(255,240,214,' + (alfa*0.14*b) + ')');
+    g.addColorStop(1,   'rgba(255,240,214,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.35*esc; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dx*comp, y - dy*comp); ctx.stroke();
 
     // silhueta: trelica central com dois pares de paineis solares
@@ -103,15 +107,17 @@ function ceu(){
 
     // brilho do modulo: gradiente, nao circulo chapado. Um arc com alpha
     // baixo desenha um disco de borda dura, que parece sujeira na tela.
-    var h = ctx.createRadialGradient(x, y, 0, x, y, 11*esc);
-    h.addColorStop(0,   'rgba(255,243,220,' + (alfa*0.42) + ')');
-    h.addColorStop(0.4, 'rgba(255,240,214,' + (alfa*0.13) + ')');
-    h.addColorStop(1,   'rgba(255,238,210,0)');
+    var rh = 17*esc*b;
+    var h = ctx.createRadialGradient(x, y, 0, x, y, rh);
+    h.addColorStop(0,   'rgba(255,246,226,' + (alfa*0.62*b) + ')');
+    h.addColorStop(0.28,'rgba(255,240,214,' + (alfa*0.24*b) + ')');
+    h.addColorStop(0.6, 'rgba(255,236,204,' + (alfa*0.07*b) + ')');
+    h.addColorStop(1,   'rgba(255,236,204,0)');
     ctx.fillStyle = h;
-    ctx.beginPath(); ctx.arc(x, y, 11*esc, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = '#FFF6E2';
-    ctx.globalAlpha = alfa*0.95;
-    ctx.beginPath(); ctx.arc(x, y, 1.9*esc, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, rh, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = '#FFFAF0';
+    ctx.globalAlpha = Math.min(1, alfa*1.0*b);
+    ctx.beginPath(); ctx.arc(x, y, 2.4*esc, 0, 6.2832); ctx.fill();
     ctx.globalAlpha = 1;
   }
 
@@ -123,8 +129,9 @@ function ceu(){
                        : 1 - suavizar((q - 0.88)/0.12);
     desenharEstacao(ax + (bx - ax)*q, ay + (by - ay)*q,
                     Math.atan2(by - ay, bx - ax),
-                    Math.min(entra, sai)*0.96,
-                    Math.max(0.7, Math.min(1, L/1120)));
+                    Math.min(entra, sai)*0.98,
+                    Math.max(1.05, Math.min(1.75, L/840)),
+                    Math.sin(q*Math.PI));
   }
 
   function estatico(){

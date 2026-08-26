@@ -94,9 +94,11 @@ plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 atravessa em ~16 s e some. Volta a cada 2,5–4 min, sempre por uma rota diferente.
 O comportamento segue o da ISS a olho nu: ponto firme e brilhante, **sem piscar** — o
 que pisca é avião — e em parte das passagens ela apaga no meio do céu, ao entrar na
-sombra da Terra, sem chegar à borda. A rota da primeira passagem foi escolhida para
-cair na faixa limpa entre a barra do topo e o rótulo: mais abaixo, ela passava atrás
-do título e ninguém veria. Custo medido: **0 fps** — segue em 60.
+sombra da Terra, sem chegar à borda. Ela também **cresce em brilho até a culminância**
+e volta a diminuir, como a ISS quando passa mais perto — um inchaço lento ao longo de
+16 s, não um pisca-pisca. A rota da primeira passagem foi escolhida para cair na faixa
+limpa entre a barra do topo e o rótulo: mais abaixo, ela passava atrás do título e
+ninguém veria. Custo medido: **0 fps** — segue em 60.
 
 **Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
 design gerado por IA. A tipografia é JetBrains Mono como display, não só como
@@ -164,6 +166,18 @@ elevadas para o céu aberto acima do rótulo.
 **9. O brilho da estação era um disco de borda dura.** Um `arc()` preenchido com
 `globalAlpha` baixo não é um brilho: é um círculo cinza chapado. Trocado por
 `createRadialGradient` com três paradas.
+
+**10. Estava lá e ninguém via.** Dois motivos, ambos meus. A estação tinha ~24 px
+atravessando 1440 px atrás do conteúdo: as medições provavam que ela existia, mas
+"existe" não é o mesmo que "aparece". Ampliada em ~75% e com halo bem mais forte.
+E o `vercel.json` servia CSS/JS com `max-age=3600`, então quem abriu a página antes
+de um deploy ficava até **uma hora** com o arquivo antigo sem consultar o servidor.
+Trocado por `max-age=0, must-revalidate` — a revalidação devolve 304 e custa quase
+nada em arquivos de 13 KB.
+
+**11. Argumentos trocados na chamada de desenho.** `culm` entrou antes de `esc`, que
+é a ordem inversa da assinatura. `node --check` não pega isso: a sintaxe é válida e a
+escala viraria o fator de brilho. Pego ao conferir a assinatura contra a chamada.
 
 ---
 
