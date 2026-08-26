@@ -5,8 +5,9 @@
 (function(){
 'use strict';
 var reduz = window.matchMedia('(prefers-reduced-motion: reduce)');
-var pararCeu = null;   // preenchido por ceu(), usado quando o video assume
-var videoNoAr = false; // com video, a estacao vetorial nao passa
+/* A faixa de ceu limpa so existe no heroi. Fora dele a estacao cruzaria
+   por tras do texto das outras secoes, onde nao ha espaco livre. */
+var heroiNaTela = true;
 
 /* ---------- 1. campo de estrelas ---------- */
 function ceu(){
@@ -59,130 +60,162 @@ function ceu(){
   }
 
   /* ---------- estacao espacial ----------
-     A ISS a olho nu nao pisca: e um ponto firme, mais brilhante que qualquer
-     estrela, atravessando o ceu em poucos minutos. E costuma sumir no meio do
-     caminho ao entrar na sombra da Terra, sem chegar ao horizonte. As duas
-     coisas estao aqui. Rotas em coordenadas relativas para sobreviver a
-     qualquer redimensionamento. */
+     Travessia de ponta a ponta: entra por um lado, cruza o ceu e sai pelo
+     outro, sumindo de vez. A proxima entra pelo lado oposto e por outra
+     altura, entao nunca repete o mesmo caminho seguido.
+     Coordenadas relativas para sobreviver a qualquer redimensionamento;
+     x fora de [0,1] e fora da tela de proposito. */
+  // A faixa de ceu entre a barra do topo e a etiqueta e estreita, e a estacao
+  // nao pode encostar no texto: atras da etiqueta o contraste cai para 1,3:1.
+  // Entao os caminhos variam em sentido e inclinacao, dentro dessa faixa.
   var ROTAS = [
-    // A primeira passagem e a que mais importa e vai pela faixa limpa entre a
-    // barra do topo e o rotulo do heroi: mais baixa que isso ela some atras do
-    // titulo gigante, que e o que acontecia antes.
-    {a:[-0.08, 0.17], b:[ 1.08, 0.085], sombra:false},
-    {a:[ 1.08, 0.11], b:[-0.08, 0.38], sombra:true },
-    {a:[-0.08, 0.60], b:[ 0.88,-0.08], sombra:false},
-    {a:[ 0.16,-0.08], b:[ 1.08, 0.33], sombra:true },
-    {a:[ 1.08, 0.55], b:[-0.08, 0.14], sombra:false}
+    {a:[ 1.16, 0.134], b:[-0.16, 0.152]},   // direita -> esquerda, descendo
+    {a:[-0.16, 0.150], b:[ 1.16, 0.133]},   // esquerda -> direita, subindo
+    {a:[ 1.16, 0.152], b:[-0.16, 0.135]},
+    {a:[-0.16, 0.133], b:[ 1.16, 0.151]},
+    {a:[ 1.16, 0.142], b:[-0.16, 0.142]},   // reta
+    {a:[-0.16, 0.148], b:[ 1.16, 0.136]}
   ];
-  var EST_PRIMEIRA  = 3400;               // primeira passagem dentro dos 10 s
-  var EST_TRAVESSIA = 16500;              // duracao de uma travessia
-  var EST_PAUSA     = [155000, 235000];   // 2,5 a 4 min ate a proxima
+  var EST_PRIMEIRA  = 2600;               // primeira aparece logo
+  var EST_TRAVESSIA = 44000;              // 44 s de ponta a ponta: sem pressa
+  var EST_PAUSA     = [52000, 84000];     // ~1 a 1,5 min de ceu limpo
 
   function suavizar(q){ return q <= 0 ? 0 : q >= 1 ? 1 : q*q*(3 - 2*q); }
 
-  /* Silhueta da ISS: trelica integrada com as oito asas solares em quatro
-     grupos, radiadores brancos junto ao centro e a pilha de modulos
-     pressurizados atravessada no meio, com a nave acoplada na ponta.
-     Desenhada em vetor e nao como imagem: nitida em qualquer densidade de
-     tela, some no peso da pagina e sem foto de banco envolvida. */
-  function asaSolar(x, y, w, h, quente, A){
-    var g = ctx.createLinearGradient(x, y, x, y + h);
-    if(quente){
-      g.addColorStop(0,   'rgba(146,98,68,'   + (A*0.90) + ')');
-      g.addColorStop(0.5, 'rgba(208,148,104,' + (A*0.98) + ')');
-      g.addColorStop(1,   'rgba(128,84,58,'   + (A*0.88) + ')');
-    } else {
-      g.addColorStop(0,   'rgba(44,60,104,'   + (A*0.90) + ')');
-      g.addColorStop(0.5, 'rgba(96,124,188,'  + (A*0.98) + ')');
-      g.addColorStop(1,   'rgba(38,52,92,'    + (A*0.88) + ')');
-    }
-    ctx.fillStyle = g;
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = 'rgba(224,232,248,' + (A*0.5) + ')';
-    ctx.fillRect(x, y + h/2 - 0.3, w, 0.6);        // mastro da asa
+  /* --- silhueta da ISS ---
+     Modelada nos quadros do proprio video: trelica integrada com os nos entre
+     segmentos, quatro pares de asas solares com a grade de celulas e a moldura
+     acobreada, radiadores brancos perpendiculares, a fila de modulos
+     pressurizados sob o centro, nave acoplada e as antenas parabolicas.
+     Vetor e nao imagem: nitida em qualquer densidade de tela e sem peso. */
+  function asaSolar(x, y, w, h, A){
+    var g = ctx.createLinearGradient(x, y, x + w, y);
+    g.addColorStop(0,    'rgba(38,52,92,'    + (A*0.92) + ')');
+    g.addColorStop(0.35, 'rgba(104,132,196,' + (A*0.96) + ')');
+    g.addColorStop(0.62, 'rgba(78,102,158,'  + (A*0.94) + ')');
+    g.addColorStop(1,    'rgba(34,46,84,'    + (A*0.90) + ')');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    // grade de celulas
+    ctx.fillStyle = 'rgba(12,16,30,' + (A*0.42) + ')';
+    for(var i = 1; i < 7; i++) ctx.fillRect(x, y + h*i/7 - 0.22, w, 0.44);
+    ctx.fillRect(x + w/2 - 0.22, y, 0.44, h);
+    // moldura acobreada das bordas longas, marca visivel da ISS
+    ctx.fillStyle = 'rgba(172,110,66,' + (A*0.8) + ')';
+    ctx.fillRect(x, y, 0.62, h); ctx.fillRect(x + w - 0.62, y, 0.62, h);
   }
 
-  // Quatro pares de asas, dois em cada ponta da trelica, cada par com uma asa
-  // de cada lado. Sao longas e estreitas -- cerca de 34 m por 12 m na real --
-  // e nao quadradas. [x inicial, acobreada]
-  var ASAS = [[-28.4, 1], [-22.2, 0], [16.4, 0], [22.6, 1]];
+  function radiador(x, y, w, h, A){
+    var g = ctx.createLinearGradient(x, y, x, y + h);
+    g.addColorStop(0, 'rgba(246,249,255,' + (A*0.92) + ')');
+    g.addColorStop(1, 'rgba(176,188,212,' + (A*0.86) + ')');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = 'rgba(120,134,164,' + (A*0.5) + ')';
+    for(var i = 1; i < 4; i++) ctx.fillRect(x + w*i/4 - 0.16, y, 0.32, h);
+  }
+
+  function modulo(x, y, w, h, A, juntas){
+    var g = ctx.createLinearGradient(x, y, x, y + h);
+    g.addColorStop(0,   'rgba(226,234,248,' + (A*0.96) + ')');
+    g.addColorStop(0.42,'rgba(250,252,255,' + (A*0.98) + ')');
+    g.addColorStop(1,   'rgba(150,162,190,' + (A*0.92) + ')');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    // juntas entre modulos: sem elas a fila le como uma barra lisa
+    ctx.fillStyle = 'rgba(112,124,152,' + (A*0.6) + ')';
+    for(var i = 1; i < (juntas || 1); i++) ctx.fillRect(x + w*i/juntas - 0.28, y, 0.56, h);
+  }
+
+  // x inicial de cada coluna de asas: duas em cada ponta da trelica
+  var PARES = [-34.0, -27.6, 22.4, 28.8];
 
   function corpoISS(A){
-    var i, g;
-    for(i = 0; i < ASAS.length; i++){
-      g = ASAS[i];
-      asaSolar(g[0], -15.6, 5.8, 13.4, g[1], A);
-      asaSolar(g[0],   2.2, 5.8, 13.4, g[1], A);
+    var i, x;
+    // Asas longas e estreitas -- ~34 m por 12 m na real -- e nao quadradas.
+    // Foi o erro mais visivel da primeira versao.
+    for(i = 0; i < PARES.length; i++){
+      x = PARES[i];
+      asaSolar(x, -28.0, 5.4, 24.4, A);
+      asaSolar(x,   3.6, 5.4, 24.4, A);
+      // mastro entre os dois paineis do par, prendendo-os a trelica. Claro
+      // demais ele parte cada painel ao meio; escuro, le como estrutura.
+      ctx.fillStyle = 'rgba(96,108,136,' + (A*0.85) + ')';
+      ctx.fillRect(x + 2.35, -28.0, 0.8, 55.0);
     }
+    // Radiadores acima da trelica, modulos abaixo: empilhados do mesmo lado
+    // viravam uma laje branca unica.
+    radiador(-7.0, -14.6, 2.8, 13.6, A);
+    radiador(-1.4, -14.6, 2.8, 13.6, A);
+    radiador( 4.2, -14.6, 2.8, 13.6, A);
     // trelica integrada, com os nos entre segmentos
-    ctx.fillStyle = 'rgba(208,218,240,' + (A*0.95) + ')';
-    ctx.fillRect(-28.4, -1.0, 56.8, 2.0);
-    ctx.fillStyle = 'rgba(142,156,190,' + (A*0.85) + ')';
-    for(i = -22; i <= 22; i += 11) ctx.fillRect(i - 0.7, -2.4, 1.4, 4.8);
-    // radiadores: tres paineis brancos e finos junto ao centro
-    ctx.fillStyle = 'rgba(240,245,254,' + (A*0.82) + ')';
-    for(i = 0; i < 3; i++) ctx.fillRect(5.6 + i*2.9, -10.2, 1.9, 9.0);
-    // pilha de modulos pressurizados atravessada na trelica
-    ctx.fillStyle = 'rgba(236,242,253,' + (A*0.97) + ')';
-    ctx.fillRect(-2.3, -8.6, 4.6, 7.8);
-    ctx.fillRect(-2.1,  1.0, 4.2, 13.0);
-    ctx.fillStyle = 'rgba(166,180,210,' + (A*0.90) + ')';
-    ctx.fillRect(-6.2, 5.2, 12.4, 1.4);                     // asas do Zvezda
-    ctx.fillRect(-1.4, 14.0, 2.8, 3.6);                     // nave acoplada
+    ctx.fillStyle = 'rgba(212,222,244,' + (A*0.96) + ')';
+    ctx.fillRect(-36.0, -1.05, 72.0, 2.1);
+    ctx.fillStyle = 'rgba(248,251,255,' + (A*0.55) + ')';
+    ctx.fillRect(-36.0, -1.05, 72.0, 0.6);          // brilho da aresta superior
+    ctx.fillStyle = 'rgba(126,140,174,' + (A*0.85) + ')';
+    for(i = -31; i <= 31; i += 7.8) ctx.fillRect(i - 0.4, -2.2, 0.8, 4.4);
+    // fila de modulos pressurizados sob o centro
+    modulo(-15.0, 2.6, 30.0, 4.1, A, 5);
+    modulo(-8.6, 7.1, 17.2, 3.0, A, 3);
+    ctx.fillStyle = 'rgba(206,216,238,' + (A*0.94) + ')';
+    ctx.fillRect(-1.6, 10.2, 3.2, 5.0);             // nave acoplada
+    // paineis menores do segmento russo, presos aos modulos
+    ctx.fillStyle = 'rgba(104,120,158,' + (A*0.9) + ')';
+    ctx.fillRect(-20.6, 3.0, 5.4, 1.1);
+    ctx.fillRect( 15.2, 3.0, 5.4, 1.1);
+    // antenas parabolicas na trelica
+    ctx.fillStyle = 'rgba(200,210,234,' + (A*0.9) + ')';
+    ctx.fillRect(-19.8, -3.0, 2.3, 2.3);
+    ctx.fillRect( 17.5, -3.0, 2.3, 2.3);
   }
 
   function desenharEstacao(x, y, ang, alfa, esc, culm, giro){
     if(alfa <= 0.002) return;
     var dx = Math.cos(ang), dy = Math.sin(ang);
-    // A ISS fica mais brilhante perto da culminancia, quando esta mais proxima.
-    // E um inchaco lento ao longo de 16 s, nao um pisca-pisca: satelite nao pisca.
-    var b = 1 + 0.45*(culm || 0);
+    // Mais brilhante perto da culminancia, quando passa mais perto. E um
+    // inchaco lento ao longo da travessia, nao um pisca-pisca: satelite
+    // nao pisca -- o que pisca e aviao.
+    var b = 1 + 0.4*(culm || 0);
 
-    // rastro, como um registro de longa exposicao
-    var comp = 150*esc;
+    var comp = 140*esc;
     var g = ctx.createLinearGradient(x, y, x - dx*comp, y - dy*comp);
-    g.addColorStop(0,   'rgba(255,240,214,' + (alfa*0.30*b) + ')');
-    g.addColorStop(0.45,'rgba(255,240,214,' + (alfa*0.10*b) + ')');
+    g.addColorStop(0,   'rgba(255,240,214,' + (alfa*0.20*b) + ')');
+    g.addColorStop(0.4, 'rgba(255,240,214,' + (alfa*0.07*b) + ')');
     g.addColorStop(1,   'rgba(255,240,214,0)');
-    ctx.strokeStyle = g; ctx.lineWidth = 1.3*esc; ctx.lineCap = 'round';
+    ctx.strokeStyle = g; ctx.lineWidth = 1.2*esc; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dx*comp, y - dy*comp); ctx.stroke();
 
-    // halo por tras, para nao lavar a silhueta que vem depois
-    var rh = 26*esc*b;
+    // Halo curto de proposito. Com 46 unidades ele alcancava a etiqueta e
+    // segurava o contraste em 3,99:1, abaixo do minimo de 4,5.
+    var rh = 27*esc*b;
     var h = ctx.createRadialGradient(x, y, 0, x, y, rh);
-    h.addColorStop(0,   'rgba(255,246,226,' + (alfa*0.30*b) + ')');
-    h.addColorStop(0.3, 'rgba(255,240,214,' + (alfa*0.13*b) + ')');
-    h.addColorStop(0.65,'rgba(255,236,204,' + (alfa*0.04*b) + ')');
+    h.addColorStop(0,   'rgba(255,246,226,' + (alfa*0.20*b) + ')');
+    h.addColorStop(0.36,'rgba(255,240,214,' + (alfa*0.07*b) + ')');
     h.addColorStop(1,   'rgba(255,236,204,0)');
     ctx.fillStyle = h;
     ctx.beginPath(); ctx.arc(x, y, rh, 0, 6.2832); ctx.fill();
 
-    // A estacao mantem a atitude em relacao a Terra, entao para quem olha do
-    // chao ela vira devagar ao longo da passagem. Dai o giro.
+    // A atitude nao segue a direcao do voo. Alinhar a trelica com o trajeto
+    // deixava a estacao de cabeca para baixo nas passagens da direita para a
+    // esquerda -- radiadores embaixo, nave acoplada para cima. Ela mantem a
+    // atitude em relacao a Terra e so vira devagar ao longo da passagem, que
+    // e o que se ve do chao.
     ctx.save();
-    ctx.translate(x, y); ctx.rotate(ang + giro); ctx.scale(esc, esc);
+    ctx.translate(x, y); ctx.rotate(giro); ctx.scale(esc, esc);
     corpoISS(alfa);
     ctx.restore();
-
-    ctx.fillStyle = '#FFFAF0';
-    ctx.globalAlpha = Math.min(1, alfa*0.85*b);
-    ctx.beginPath(); ctx.arc(x, y, 1.7*esc, 0, 6.2832); ctx.fill();
-    ctx.globalAlpha = 1;
   }
 
   function passagem(q, r){
-    if(videoNoAr) return;      // ja existe uma estacao real na tela
+    if(!heroiNaTela) return;
     var ax = r.a[0]*L, ay = r.a[1]*A, bx = r.b[0]*L, by = r.b[1]*A;
-    var entra = suavizar(q/0.10);
-    // com sombra ela apaga no meio do ceu; sem, so ao sair pela borda
-    var sai = r.sombra ? 1 - suavizar((q - 0.54)/0.30)
-                       : 1 - suavizar((q - 0.88)/0.12);
+    // Aparece e some so nas pontas do trajeto, ja fora da area util: ela
+    // atravessa inteira, sem apagar no meio do ceu.
+    var alfa = Math.min(suavizar(q/0.07), 1 - suavizar((q - 0.93)/0.07));
     desenharEstacao(ax + (bx - ax)*q, ay + (by - ay)*q,
                     Math.atan2(by - ay, bx - ax),
-                    Math.min(entra, sai)*0.98,
-                    Math.max(0.62, Math.min(1.22, L/1180)),
+                    alfa*0.98,
+                    Math.max(1.0, Math.min(1.85, L/780)),
                     Math.sin(q*Math.PI),
-                    -0.42 + 0.78*q);
+                    -0.17 + 0.30*q);
   }
 
   function estatico(){
@@ -253,9 +286,6 @@ function ceu(){
   proxEst = EST_PRIMEIRA;
   semear(); ligar();
 
-  // Esconder por CSS nao basta: o laco continuaria rodando e gastando
-  // bateria por tras de um canvas invisivel.
-  pararCeu = function(){ cancelAnimationFrame(raf); raf = 0; ctx.clearRect(0,0,L,A); };
 
   var tmr;
   window.addEventListener('resize', function(){
@@ -406,67 +436,18 @@ function sistemas(){
   aplicar(so);
 }
 
-/* ---------- 7. video de fundo ---------- */
-/* Decidido no topo do script, que roda com defer -- DOM ja montado, nada
-   pintado ainda. Em retrato o heroi ganha um respiro de ceu, e essa folga
-   precisa estar valendo antes da primeira pintura, senao o texto desce
-   sozinho quando o video engata. */
-function podeVideo(){
-  var v = document.getElementById('fundo');
-  if(!v || !v.canPlayType || !v.canPlayType('video/mp4')) return false;
-  if(reduz.matches) return false;                       // ceu quieto continua quieto
-  var con = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  // 400-680 KB de fundo decorativo nao se impoe a quem paga por megabyte
-  if(con && (con.saveData || /^(slow-)?2g$/.test(con.effectiveType || ''))) return false;
-  return true;
-}
-
-function fundo(){
-  var v = document.getElementById('fundo');
-  if(!v || !document.documentElement.classList.contains('video-previsto')) return;
-
-  // Retrato pede o corte vertical; paisagem, o horizontal.
-  var retrato = window.innerHeight > window.innerWidth;
-  v.poster = retrato ? 'video/poster-mobile.jpg' : 'video/poster-desktop.jpg';
-  v.src    = retrato ? 'video/ceu-mobile.mp4'    : 'video/ceu-desktop.mp4';
-
-  // So troca de camada quando o video de fato comecou a andar. Se o autoplay
-  // for bloqueado, este evento nunca dispara e o canvas segue no lugar dele.
-  v.addEventListener('playing', function(){
-    document.documentElement.classList.add('video-ativo');
-    v.classList.add('tocando');
-    videoNoAr = true;
-  }, {once:true});
-
-  // Fora do heroi o video nao tem serventia e passaria por tras de texto.
-  // Some e pausa: menos bateria e nenhum risco de contraste la embaixo.
-  var heroi = document.querySelector('.levantamento');
-  if(heroi && 'IntersectionObserver' in window){
-    new IntersectionObserver(function(e){
-      var dentro = e[0].isIntersecting;
-      v.classList.toggle('tocando', dentro && videoNoAr);
-      if(dentro){ if(v.paused && videoNoAr) v.play().catch(function(){}); }
-      else v.pause();
-    }, {threshold:0}).observe(heroi);
-  }
-
-  v.load();
-  var p = v.play();
-  if(p && p.catch) p.catch(desistir);
-  v.addEventListener('error', desistir, {once:true});
-
-  // Autoplay negado ou video quebrado: devolve o layout ao estado sem video,
-  // senao sobraria um vao de ceu vazio no alto do celular.
-  function desistir(){
-    document.documentElement.classList.remove('video-previsto');
-  }
+/* ---------- 7. limites do heroi ---------- */
+function vigiarHeroi(){
+  var h = document.querySelector('.levantamento');
+  if(!h || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function(e){ heroiNaTela = e[0].isIntersecting; },
+    {threshold:0}).observe(h);
 }
 
 /* ---------- arranque ---------- */
 document.documentElement.classList.add('js-pronto');
-if(podeVideo()) document.documentElement.classList.add('video-previsto');
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', iniciar);
 } else { iniciar(); }
-function iniciar(){ ceu(); fundo(); revelar(); registro(); filtros(); copiar(); sistemas(); }
+function iniciar(){ vigiarHeroi(); ceu(); revelar(); registro(); filtros(); copiar(); sistemas(); }
 })();

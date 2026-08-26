@@ -90,38 +90,28 @@ de componentes.
 K é laranja. E os tipos fazem sentido: o kit Mobile é `Sistema binário` (duas
 plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 
-**Um vídeo real da ISS ocupa o alto do herói.** Dois cortes, um por formato:
-paisagem no desktop, retrato no celular. Cada dispositivo baixa só o seu —
-676 KB ou 400 KB. Os originais foram processados antes de entrar: marca d'água
-do gerador apagada com `delogo`, faixa de áudio removida (inútil num fundo mudo,
-custava 160 KB) e o laço fechado com ida e volta, porque o clipe termina com a
-estação grande no centro e recomeça com ela minúscula — em laço simples isso é
-um corte seco a cada poucos segundos. Diferença medida entre o primeiro e o
-último quadro: **0,59** contra 13,9 de dois quadros quaisquer.
+**A ISS atravessa o céu de ponta a ponta.** Entra fora da tela por um lado,
+cruza em **44 segundos** — devagar, é fundo — e sai pelo outro, sumindo de vez.
+A próxima entra pelo lado oposto e por outra inclinação, então nunca repete o
+mesmo caminho seguido. Intervalo entre passagens: 52 a 84 segundos. Medido:
+passagem 1 de 3,1 s a 46,9 s indo da direita para a esquerda, passagem 2
+começando aos 130 s no sentido inverso.
 
-O vídeo não cobre a tela: uma máscara o deixa só no canto sem texto e o dissolve
-no campo de estrelas do canvas, que continua rodando por baixo. Escurecer a tela
-inteira não funciona — testei os dois extremos e ou o texto fica ilegível sobre
-os painéis solares, ou a estação vira uma sombra. E ele **some ao sair do herói**,
-para que nenhum texto do resto da página seja composto contra ele.
+**A silhueta é desenhada em vetor, modelada nos quadros do próprio vídeo:**
+treliça integrada com os nós entre segmentos, quatro pares de asas solares com
+a grade de células e a moldura acobreada, mastros prendendo cada par à treliça,
+radiadores brancos acima e a fila de módulos pressurizados abaixo, com a nave
+acoplada e as antenas parabólicas. Vetor e não foto: nítida em qualquer
+densidade de tela, escala com a largura e não pesa nada. A atitude **não** segue
+a direção do voo — alinhar a treliça com o trajeto deixava a estação de cabeça
+para baixo nas passagens da direita para a esquerda. Ela fica na horizontal e
+gira devagar, como se vê do chão. O brilho cresce até a culminância e cai, sem
+piscar: satélite não pisca, o que pisca é avião.
 
-**Uma estação espacial cruza o céu quando não há vídeo.** É a ISS desenhada em vetor no canvas:
-treliça integrada, os quatro pares de asas solares nas pontas, radiadores brancos
-junto ao centro e a pilha de módulos pressurizados atravessada no meio, com a nave
-acoplada na ponta. Vetor e não foto — fica nítida em qualquer densidade de tela, não
-soma nada ao carregamento e não depende de imagem de banco. Ela também **gira devagar
-ao longo da passagem**, porque a estação mantém a atitude em relação à Terra e por
-isso muda de ângulo para quem olha do chão. Aparece pela primeira vez por volta dos 4 s,
-atravessa em ~16 s e some. Volta a cada 2,5–4 min, sempre por uma rota diferente.
-O comportamento segue o da ISS a olho nu: ponto firme e brilhante, **sem piscar** — o
-que pisca é avião — e em parte das passagens ela apaga no meio do céu, ao entrar na
-sombra da Terra, sem chegar à borda. Ela também **cresce em brilho até a culminância**
-e volta a diminuir, como a ISS quando passa mais perto — um inchaço lento ao longo de
-16 s, não um pisca-pisca. A rota da primeira passagem foi escolhida para cair na faixa
-limpa entre a barra do topo e o rótulo: mais abaixo, ela passava atrás do título e
-ninguém veria. Custo medido: **0 fps** — segue em 60.
+**O céu ao fundo é um quadro parado do vídeo** — só a Via Láctea, sem a estação
+e sem a marca d'água do gerador. 14 KB, nenhum movimento.
 
-**Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
+**Sem gradiente roxo-azul, sem Inter, sem Poppins****Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
 design gerado por IA. A tipografia é JetBrains Mono como display, não só como
 metadado.
 
@@ -199,6 +189,19 @@ nada em arquivos de 13 KB.
 **11. Argumentos trocados na chamada de desenho.** `culm` entrou antes de `esc`, que
 é a ordem inversa da assinatura. `node --check` não pega isso: a sintaxe é válida e a
 escala viraria o fator de brilho. Pego ao conferir a assinatura contra a chamada.
+
+**14. A estação passava atrás da etiqueta.** Com a silhueta maior e mais clara,
+os painéis iluminados cruzavam o texto de "Levantamento do céu profundo" e o
+contraste caía para **1,28:1**. Isso não tem conserto por cor — painel branco
+atrás de texto cinza pequeno não passa em nenhum tom. A correção foi geométrica:
+o herói ganhou um respiro de céu no alto, a rota ficou presa a essa faixa livre,
+o halo encolheu de 46 para 27 unidades (alcançava a etiqueta sozinho) e a
+estação para de passar quando o herói sai da tela, onde não há faixa livre
+nenhuma. Pior caso agora: 5,18:1.
+
+**15. `--texto-3` não tinha folga nenhuma.** Estava em 4,91:1 contra o preto
+puro — passa no papel, mas qualquer coisa no fundo, até uma estrela clara do
+canvas, derrubava abaixo de 4,5. Subiu para 6,16:1.
 
 **12. O contraste caía com o vídeo no ar.** Medi o pixel de fundo sob a caixa de
 cada bloco de texto, em dez instantes do laço, e comparei com a cor computada de
