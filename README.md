@@ -90,28 +90,31 @@ de componentes.
 K é laranja. E os tipos fazem sentido: o kit Mobile é `Sistema binário` (duas
 plataformas), o kit de Pesquisa está na constelação `Telescopium`.
 
-**A ISS atravessa o céu de ponta a ponta.** Entra fora da tela por um lado,
-cruza em **44 segundos** — devagar, é fundo — e sai pelo outro, sumindo de vez.
-A próxima entra pelo lado oposto e por outra inclinação, então nunca repete o
-mesmo caminho seguido. Intervalo entre passagens: 52 a 84 segundos. Medido:
-passagem 1 de 3,1 s a 46,9 s indo da direita para a esquerda, passagem 2
-começando aos 130 s no sentido inverso.
+**Uma estação espacial atravessa o céu de ponta a ponta.** Entra fora da tela
+por um lado, cruza em **44 segundos** — devagar, é fundo — e sai pelo outro,
+sumindo de vez. A próxima entra pelo lado oposto e por outra inclinação, então
+nunca repete o mesmo caminho seguido. Intervalo entre passagens: 52 a 84
+segundos. Medido: passagem 1 de 3,1 s a 46,9 s indo da direita para a esquerda,
+passagem 2 começando aos 130 s no sentido inverso.
 
-**A silhueta é desenhada em vetor, modelada nos quadros do próprio vídeo:**
-treliça integrada com os nós entre segmentos, quatro pares de asas solares com
-a grade de células e a moldura acobreada, mastros prendendo cada par à treliça,
-radiadores brancos acima e a fila de módulos pressurizados abaixo, com a nave
-acoplada e as antenas parabólicas. Vetor e não foto: nítida em qualquer
-densidade de tela, escala com a largura e não pesa nada. A atitude **não** segue
-a direção do voo — alinhar a treliça com o trajeto deixava a estação de cabeça
-para baixo nas passagens da direita para a esquerda. Ela fica na horizontal e
-gira devagar, como se vê do chão. O brilho cresce até a culminância e cai, sem
-piscar: satélite não pisca, o que pisca é avião.
+**A estação é uma foto recortada, não um desenho.** É a *Astria Station* —
+uma estação fictícia, não a ISS real. O recorte é feito por
+`ferramentas/sprite.py`, e o passo que importa não é apagar o fundo preto: é
+apagar as **estrelas**. Uma rampa de luminância não as separa, porque uma
+estrela é tão clara quanto a treliça. O que separa é o tamanho — a estação é
+uma região conectada de 225.782 pixels e a maior mancha seguinte tem 1.824,
+duas ordens de grandeza de distância. Sobrevive quem tiver ao menos 5% da maior
+região; o corte é relativo, então se a estação vier partida em duas peças
+grandes as duas ficam. Resultado: **148 KB** em WebP, contra 606 KB em PNG.
 
-**O céu ao fundo é um quadro parado do vídeo** — só a Via Láctea, sem a estação
-e sem a marca d'água do gerador. 14 KB, nenhum movimento.
+A silhueta em vetor continua no código como reserva: se o arquivo faltar ou
+falhar ao carregar, ela assume e a página nunca fica sem estação. Testado com
+o arquivo ausente.
 
-**Sem gradiente roxo-azul, sem Inter, sem Poppins****Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
+**O céu ao fundo é um quadro parado do vídeo** — só a Via Láctea, sem estação
+e sem marca d'água do gerador. 14 KB, nenhum movimento.
+
+**Sem gradiente roxo-azul, sem Inter, sem Poppins****Sem gradiente roxo-azul, sem Inter, sem Poppins****Sem gradiente roxo-azul, sem Inter, sem Poppins** — os três maiores clichês de
 design gerado por IA. A tipografia é JetBrains Mono como display, não só como
 metadado.
 
@@ -189,6 +192,11 @@ nada em arquivos de 13 KB.
 **11. Argumentos trocados na chamada de desenho.** `culm` entrou antes de `esc`, que
 é a ordem inversa da assinatura. `node --check` não pega isso: a sintaxe é válida e a
 escala viraria o fator de brilho. Pego ao conferir a assinatura contra a chamada.
+
+**16. O sprite chegava depois da cena parada.** Com `prefers-reduced-motion` o
+céu é desenhado uma única vez. Se a imagem terminasse de carregar depois disso,
+ficava a silhueta em vetor na tela para sempre. Agora a chegada do sprite dispara
+um redesenho — só nesse modo.
 
 **14. A estação passava atrás da etiqueta.** Com a silhueta maior e mais clara,
 os painéis iluminados cruzavam o texto de "Levantamento do céu profundo" e o

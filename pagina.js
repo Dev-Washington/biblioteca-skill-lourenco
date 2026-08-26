@@ -9,6 +9,23 @@ var reduz = window.matchMedia('(prefers-reduced-motion: reduce)');
    por tras do texto das outras secoes, onde nao ha espaco livre. */
 var heroiNaTela = true;
 
+/* Sprite da estacao. Se o arquivo nao existir ou falhar ao carregar, a
+   silhueta em vetor assume -- a pagina nunca fica sem estacao. */
+var sprite = null;
+var redesenhar = null;   // preenchido por ceu(); usado quando o sprite chega
+(function(){
+  var im = new Image();
+  im.decoding = 'async';
+  im.onload = function(){
+    if(!im.naturalWidth) return;
+    sprite = im;
+    // Em movimento reduzido a cena e desenhada uma unica vez. Se o sprite
+    // chegasse depois disso, ficaria o vetor na tela para sempre.
+    if(reduz.matches && redesenhar) redesenhar();
+  };
+  im.src = 'video/estacao.webp';
+})();
+
 /* ---------- 1. campo de estrelas ---------- */
 function ceu(){
   var cv = document.getElementById('estrelas');
@@ -199,8 +216,21 @@ function ceu(){
     // atitude em relacao a Terra e so vira devagar ao longo da passagem, que
     // e o que se ve do chao.
     ctx.save();
-    ctx.translate(x, y); ctx.rotate(giro); ctx.scale(esc, esc);
-    corpoISS(alfa);
+    ctx.translate(x, y); ctx.rotate(giro);
+    if(sprite){
+      // Altura casada com a faixa livre de ceu, nao com a largura da tela:
+      // e a altura que decide se ela encosta no texto.
+      // 0,135 da altura, nao mais: com o giro, uma imagem de 304 px de
+      // largura cresce 10 px em meia-altura, e a faixa livre tem 154 px.
+      var ah = Math.max(52, Math.min(120, A*0.135));
+      var aw = ah * sprite.naturalWidth / sprite.naturalHeight;
+      ctx.globalAlpha = alfa;
+      ctx.drawImage(sprite, -aw/2, -ah/2, aw, ah);
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.scale(esc, esc);
+      corpoISS(alfa);
+    }
     ctx.restore();
   }
 
@@ -215,7 +245,7 @@ function ceu(){
                     alfa*0.98,
                     Math.max(1.0, Math.min(1.85, L/780)),
                     Math.sin(q*Math.PI),
-                    -0.17 + 0.30*q);
+                    -0.07 + 0.13*q);
   }
 
   function estatico(){
@@ -284,6 +314,7 @@ function ceu(){
   }
 
   proxEst = EST_PRIMEIRA;
+  redesenhar = estatico;
   semear(); ligar();
 
 

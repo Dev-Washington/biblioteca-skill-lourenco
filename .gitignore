@@ -7,3 +7,5 @@ node_modules/
 
 # videos originais do celular: fonte para video/, nao vao para o deploy
 IMG_*.MP4
+# fontes das imagens da estacao: viram video/estacao.webp
+IMG_*.JPG
