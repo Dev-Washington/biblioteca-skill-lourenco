@@ -473,6 +473,47 @@ svg.ext{width:11px;height:11px;flex:none;opacity:.75}
 .so-aba[aria-pressed="true"]{color:var(--texto);border-color:var(--texto-3);background:var(--camada)}
 .so-aba:focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
 
+/* ---------- prompt de instalação ---------- */
+.prompt-bloco{
+  border:1px solid var(--linha);border-radius:3px;background:var(--camada);
+  margin-top:clamp(1.4rem,3.5vh,2rem);overflow:hidden;
+}
+.prompt-abas{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:.6rem 1rem;padding:.75rem .85rem;border-bottom:1px solid var(--linha);
+}
+.pr-grupo{display:flex;flex-wrap:wrap;gap:.4rem}
+.pr-aba{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.5rem .85rem;border:1px solid var(--linha);border-radius:2px;color:var(--texto-3);
+  transition:color var(--d-rapido) linear,border-color var(--d-rapido) linear,
+             background-color var(--d-rapido) linear;
+}
+.pr-aba:hover{color:var(--texto-2);border-color:var(--linha-forte)}
+.pr-aba[aria-pressed="true"]{color:var(--texto);border-color:var(--texto-3);background:var(--camada-2)}
+.pr-aba:focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
+.pr-arquivo{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;color:var(--texto-3);
+  text-decoration:none;border-bottom:1px solid var(--linha-forte);
+  transition:color var(--d-rapido) linear,border-color var(--d-rapido) linear;
+}
+.pr-arquivo:hover{color:var(--ambar);border-color:var(--ambar)}
+.pr-arquivo:focus-visible{outline:2px solid var(--ambar);outline-offset:3px}
+.pr-painel[hidden]{display:none}
+.pr-topo{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:.5rem .9rem;padding:.7rem .85rem;background:var(--camada-2);
+  border-bottom:1px solid var(--linha);
+}
+.pr-rotulo{font-family:var(--mono);font-size:.62rem;letter-spacing:.05em;color:var(--texto-3)}
+.pr-texto{
+  margin:0;padding:clamp(.9rem,2.4vw,1.35rem);background:var(--vazio);
+  font-family:var(--mono);font-size:.7rem;line-height:1.78;color:var(--texto-2);
+  white-space:pre;overflow:auto;max-height:min(62vh,30rem);
+  overscroll-behavior:contain;
+}
+.pr-texto:focus-visible{outline:2px solid var(--ambar);outline-offset:-2px}
+
 .avisos{margin-top:1.5rem}
 .aviso{
   margin:0;border-left:2px solid var(--ambar);padding:.15rem 0 .15rem 1rem;

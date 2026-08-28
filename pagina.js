@@ -420,7 +420,8 @@ function copiar(){
   document.querySelectorAll('.copiar').forEach(function(b){
     b.addEventListener('click', function(e){
       e.stopPropagation();
-      var txt = b.previousElementSibling ? b.previousElementSibling.textContent.trim() : '';
+      var alvo = b.dataset.alvo ? document.getElementById(b.dataset.alvo) : b.previousElementSibling;
+      var txt = alvo ? alvo.textContent.trim() : '';
       var fim = function(ok){
         b.textContent = ok ? 'copiado' : 'falhou';
         b.dataset.ok = ok ? '1' : '';
@@ -480,5 +481,18 @@ document.documentElement.classList.add('js-pronto');
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', iniciar);
 } else { iniciar(); }
-function iniciar(){ vigiarHeroi(); ceu(); revelar(); registro(); filtros(); copiar(); sistemas(); }
+/* ---------- 7. versões do prompt ---------- */
+function versoesPrompt(){
+  var abas = document.querySelectorAll('.pr-aba');
+  if(!abas.length) return;
+  function aplicar(v){
+    abas.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.pr === v ? 'true' : 'false'); });
+    document.querySelectorAll('[data-painel]').forEach(function(el){
+      if(el.dataset.painel === v) el.removeAttribute('hidden'); else el.setAttribute('hidden','');
+    });
+  }
+  abas.forEach(function(b){ b.addEventListener('click', function(){ aplicar(b.dataset.pr); }); });
+}
+
+function iniciar(){ vigiarHeroi(); ceu(); revelar(); registro(); filtros(); copiar(); sistemas(); versoesPrompt(); }
 })();

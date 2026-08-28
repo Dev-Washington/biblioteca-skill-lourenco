@@ -61,18 +61,22 @@ O `vercel.json` cuida de cache dos `.zip` e dos cabeçalhos de segurança.
 
 ```
 .
-├── index.html      a página — gerada a partir de catalogo.js
+├── index.html      a página — gerada por gerar.js
+├── gerar.js        gerador: lê catalogo.js e PROMPT-INSTALAR-KIT.md
 ├── estilo.css      folha de estilo
-├── pagina.js       campo de estrelas, revelação, filtros, fichas
+├── pagina.js       campo de estrelas, revelação, filtros, fichas, prompts
 ├── catalogo.js     dados dos 13 kits — fonte da verdade
+├── PROMPT-INSTALAR-KIT.md   os dois prompts da seção 03 — fonte da verdade
 ├── og.jpg          imagem de compartilhamento (1200×630)
 ├── vercel.json     cache e cabeçalhos
 ├── robots.txt
 └── downloads/      14 arquivos .zip (13 kits + pacote completo)
 ```
 
-Para mudar um kit: edite `catalogo.js` e regenere o `index.html`, ou edite a linha
-correspondente direto no HTML.
+Para mudar um kit: edite `catalogo.js` e rode `node gerar.js`.
+Para mudar os prompts de instalação: edite `PROMPT-INSTALAR-KIT.md` — os dois blocos
+```` ``` ```` dele viram a versão completa e a versão curta da seção 03 — e rode
+`node gerar.js`. O `.md` também fica baixável em `/PROMPT-INSTALAR-KIT.md`.
 
 ---
 

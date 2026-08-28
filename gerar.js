@@ -58,6 +58,16 @@ const linhas=CATALOGO.map(k=>{
         </article>`;
 }).join("");
 
+/* prompts de instalação — fonte única: PROMPT-INSTALAR-KIT.md */
+/* o original mora na raiz do repo de kits; se estiver ao lado, sincroniza a cópia local
+   (é ela que vai para o deploy — a pasta da landpage é o repo publicado). */
+if(fs.existsSync("../PROMPT-INSTALAR-KIT.md")) fs.copyFileSync("../PROMPT-INSTALAR-KIT.md","PROMPT-INSTALAR-KIT.md");
+const promptMd=fs.readFileSync("PROMPT-INSTALAR-KIT.md","utf8");
+const blocos=[...promptMd.matchAll(/```\n([\s\S]*?)```/g)].map(m=>m[1].replace(/\s+$/,""));
+if(blocos.length<2) throw new Error("PROMPT-INSTALAR-KIT.md: esperava 2 blocos de prompt, achei "+blocos.length);
+const [promptLongo,promptCurto]=blocos;
+const linhasLongo=promptLongo.split("\n").length, linhasCurto=promptCurto.split("\n").length;
+
 const chips=Object.entries(CLASSES).map(([c,v])=>{
   const n=CATALOGO.filter(k=>k.classe===c).length;
   return `<button class="filtro" type="button" data-classe="${c}" aria-pressed="false"><i style="background:${v.cor}" aria-hidden="true"></i>${esc(v.nome)} <span class="cont">${n}</span></button>`;
@@ -107,6 +117,8 @@ const html=`<!doctype html>
       <span class="status-sep" aria-hidden="true"></span>
       <span class="pip oculta-mob">13 objetos catalogados</span>
       <span class="status-sep oculta-mob" aria-hidden="true"></span>
+      <a class="destaque-link oculta-mob" href="#prompt">prompt de instalação</a>
+      <span class="status-sep oculta-mob" aria-hidden="true"></span>
       <a class="destaque-link oculta-mob" href="https://portifolio-lourenco.vercel.app/" target="_blank" rel="noopener noreferrer">por Washington Lourenço</a>
       <a class="pip destaque-link" href="downloads/TODOS-OS-KITS.zip" download>baixar tudo<span class="sr"> — os 13 kits, arquivo zip</span></a>
     </div>
@@ -132,6 +144,7 @@ const html=`<!doctype html>
       <div class="acoes rev">
         <a class="btn btn-primario" href="downloads/TODOS-OS-KITS.zip" download>${seta} Baixar os 13 kits</a>
         <a class="btn" href="#catalogo">Percorrer o catálogo</a>
+        <a class="btn" href="#prompt">Prompt de instalação</a>
       </div>
     </section>
 
@@ -266,9 +279,55 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
       </p>
     </section>
 
+    <section class="secao faixa" id="prompt" aria-labelledby="t-prompt">
+      <div class="secao-topo">
+        <span class="indice" aria-hidden="true">03 — Piloto automático</span>
+        <h2 id="t-prompt">Deixe o Claude escolher o kit</h2>
+      </div>
+      <p class="nota rev nota-topo">
+        Se você não quer decidir sozinho qual dos 13 kits serve ao seu projeto, cole um dos
+        prompts abaixo numa sessão do Claude&nbsp;Code aberta <strong>dentro do projeto</strong>.
+        Ele lê o que já existe ali, recomenda com evidência do seu próprio código, espera o seu
+        ok e só então baixa e instala.
+      </p>
+
+      <div class="prompt-bloco rev">
+        <div class="prompt-abas">
+          <div class="pr-grupo" role="group" aria-label="Escolha a versão do prompt">
+            <button class="pr-aba" type="button" data-pr="longo" aria-pressed="true">Versão completa</button>
+            <button class="pr-aba" type="button" data-pr="curto" aria-pressed="false">Versão curta</button>
+          </div>
+          <a class="pr-arquivo" href="PROMPT-INSTALAR-KIT.md" download>PROMPT-INSTALAR-KIT.md<span class="sr"> — baixar o arquivo com as duas versões</span></a>
+        </div>
+
+        <div class="pr-painel" data-painel="longo">
+          <div class="pr-topo">
+            <span class="pr-rotulo">5 passos · diagnóstico, catálogo, recomendação, download e conferência · ${linhasLongo} linhas</span>
+            <button class="copiar" type="button" data-alvo="prompt-longo">copiar<span class="sr"> o prompt completo</span></button>
+          </div>
+          <pre class="pr-texto" id="prompt-longo" tabindex="0">${esc(promptLongo)}</pre>
+        </div>
+
+        <div class="pr-painel" data-painel="curto" hidden>
+          <div class="pr-topo">
+            <span class="pr-rotulo">Direto ao ponto · para quem já conhece o catálogo · ${linhasCurto} linhas</span>
+            <button class="copiar" type="button" data-alvo="prompt-curto">copiar<span class="sr"> o prompt curto</span></button>
+          </div>
+          <pre class="pr-texto" id="prompt-curto" tabindex="0">${esc(promptCurto)}</pre>
+        </div>
+      </div>
+
+      <p class="nota nota-fim">
+        Os dois prompts travam antes de instalar qualquer coisa: o Claude só baixa o
+        <code>.zip</code> depois do seu ok, mostra o que o instalador vai tocar
+        (<code>.claude/settings.json</code>, <code>.mcp.json</code>, <code>CLAUDE.md</code>) e não
+        sobrescreve arquivo seu sem avisar.
+      </p>
+    </section>
+
     <section class="secao faixa" aria-labelledby="t-proc">
       <div class="secao-topo">
-        <span class="indice" aria-hidden="true">03 — Procedência</span>
+        <span class="indice" aria-hidden="true">04 — Procedência</span>
         <h2 id="t-proc">De onde vieram</h2>
       </div>
       <div class="colofao-grade rev">
@@ -312,7 +371,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
     <section class="secao faixa" id="autoria" aria-labelledby="t-autoria">
       <div class="secao-topo">
-        <span class="indice" aria-hidden="true">04 — Observador</span>
+        <span class="indice" aria-hidden="true">05 — Observador</span>
         <h2 id="t-autoria">Quem compilou</h2>
       </div>
       <div class="placa rev">
